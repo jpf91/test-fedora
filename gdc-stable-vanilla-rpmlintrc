@@ -1,0 +1,2 @@
+# Building RPMs is such a PITA... Why can't everybody just use arch's PKGBUILD system?
+addFilter("devel-file-in-non-devel-package")

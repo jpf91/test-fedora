@@ -3,6 +3,22 @@
 # source code for this spec file is maintained at ...
 #
 
+# To detect whether we're on OBS
+%if %(if [[ "%{vendor}" == obs://* ]] ; then echo 1 ; else echo 0 ; fi)
+%define opensuse_bs 1
+%endif
+
+# OBS ppc64le builder often goes OOM
+%if 0%{?opensuse_bs}
+%ifarch ppc64le
+%global make_multicore_flags 
+%else
+%global make_multicore_flags %{?_smp_mflags}
+%endif
+%else
+%global make_multicore_flags %{?_smp_mflags}
+%endif
+
 # Note, gcc_release must be integer, if you want to add suffixes to
 # %%{release}, append them after %%{gcc_release} on Release: line.
 %global gdc_snapshot 20180729gitd28e61d
@@ -28,6 +44,7 @@ License: GPLv3+ and GPLv3+ with exceptions and GPLv2+ with exceptions and LGPLv2
 Group: Development/Languages
 Source0: gcc-%{version}.tar.xz
 Source1: gdc-%{gdc_snapshot}.tar.gz
+Source2: gdc-stable-vanilla-rpmlintrc
 URL: http://gdcproject.org
 
 BuildRequires: binutils, zlib-devel, gettext, dejagnu, bison, flex, sharutils
@@ -56,6 +73,10 @@ Provides: libgphobos = %{phobos_version}
 Provides: libgphobos-stable-devel = %{phobos_version}
 Provides: libgphobos-devel = %{phobos_version}
 %endif
+
+# Do not check .so files in an application-specific library directory
+# or any files in the application's data directory for provides
+%global __provides_exclude_from ^/opt/.*$
 
 
 
@@ -86,9 +107,16 @@ cd objdir
 %if !%{build_libphobos}
     --disable-libphobos \
 %endif
+%ifarch armv7hl
+	--with-float=hard \
+%if 0%{?fedora} >= 20 || 0%{?rhel} >= 6
+	--with-tune=generic-armv7-a --with-arch=armv7-a \
+	--with-fpu=vfpv3-d16 --with-abi=aapcs-linux \
+%endif
+%endif
     --libdir=/opt/gdc-stable-vanilla/%{_lib} --enable-linker-build-id
 
-make %{?_smp_mflags}
+make %{make_multicore_flags}
 
 
 
