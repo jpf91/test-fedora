@@ -11,7 +11,7 @@
 # OBS ppc64le builder often goes OOM
 %if 0%{?opensuse_bs}
 %ifarch ppc64le
-%global make_multicore_flags 
+%global make_multicore_flags -j1
 %else
 %global make_multicore_flags %{?_smp_mflags}
 %endif
