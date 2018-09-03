@@ -77,7 +77,7 @@ Provides: libgphobos-devel = %{phobos_version}
 # Do not check .so files in an application-specific library directory
 # or any files in the application's data directory for provides
 %global __provides_exclude_from ^/opt/.*$
-
+%global __requires_exclude_from ^/opt/.*$
 
 
 %description
@@ -102,7 +102,7 @@ popd
 %build
 mkdir objdir
 cd objdir
-../configure --disable-bootstrap --enable-languages=d,lto --enable-checking=release \
+../configure --disable-bootstrap --enable-languages=c++,d,lto --enable-checking=release \
     --disable-multilib --prefix=/opt/gdc-stable-vanilla \
 %if !%{build_libphobos}
     --disable-libphobos \
